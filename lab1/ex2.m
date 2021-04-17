@@ -1,5 +1,5 @@
 % a)
-% n erros num pacote -> variavel aleatoria binomial
+% num erros num pacote -> variavel aleatoria binomial
 % sucesso é o BER
 % n experiencias de Bernoulli é o n de bits do pacote
 
