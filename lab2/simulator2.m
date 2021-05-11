@@ -7,14 +7,16 @@ function [b_hd b_4k]= simulator2(lambda, p, n, S, W, R, fname)
     % R - number of movie requests to stop simulation
     % fname - file name with the duration (in minutes) of the items
     
+    C = n * S;
+    
     invlambda=60/lambda;     %average time between requests (in minutes)
     invmiu= load(fname);     %duration (in minutes) of each movie
     Nmovies= length(invmiu); % number of movies
     
     %Events definition:
     ARRIVAL= 0;        %movie request
-    DEPARTURE_HD = zeros(1, n);  %termination of a HD movie transmission
-    DEPARTURE_4K = zeros(1, n);  %termination of a 4K movie transmission
+    DEPARTURE_HD = 1;  %termination of a HD movie transmission
+    DEPARTURE_4K = 2;  %termination of a 4K movie transmission
     
     %State variables initialization:
     STATE= zeros(1, n);
@@ -43,20 +45,22 @@ function [b_hd b_4k]= simulator2(lambda, p, n, S, W, R, fname)
             NARRIVALS= NARRIVALS + 1;
             % filme 4k
             if rand() <= p/100
-                [valor index] = min(STATE);
+                [valor, index] = min(STATE);
                 REQUESTS_4K = REQUESTS_4K + 1;
                 if valor + 25 <= S
                     EventList= [EventList; DEPARTURE_4K Clock+invmiu(randi(Nmovies)) index];
+                    STATE(index) = STATE(index) + 25;
                 else
                     BLOCKED_4K= BLOCKED_4K + 1;
                 end
             % filme HD    
             else
-                [valor index] = min(STATE);
+                [valor, index] = min(STATE);
                 REQUESTS_HD=REQUESTS_HD + 1;
-                if (valor + 5 <= S) && (STATE_HD + 5 < = C - W)
+                if (valor + 5 <= S) && (STATE_HD + 5 <= C - W)
                     EventList= [EventList; DEPARTURE_HD Clock+invmiu(randi(Nmovies)) index];
-                    STATE_HD = STATE_HD + valor;
+                    STATE_HD = STATE_HD + 5;
+                    STATE(index) = STATE(index) + 5;
                 else
                     BLOCKED_HD = BLOCKED_HD + 1;
                 end
