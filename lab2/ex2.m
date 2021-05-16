@@ -45,6 +45,8 @@ end
 
 figure(1)
 bar(lambda, mediaBlock_hd)
+title('Blocking probability of HD movies')
+xlabel('Request/Hour')
 hold on
 er = errorbar(lambda, mediaBlock_hd, termBlock_hd, termBlock_hd);
 er.LineStyle = 'none';  
@@ -53,6 +55,8 @@ grid on
 
 figure(2)
 bar(lambda, mediaBlock_4k)
+title('Blocking probability of 4K movies')
+xlabel('Request/Hour')
 hold on
 er = errorbar(lambda, mediaBlock_4k, termBlock_4k, termBlock_4k);
 er.LineStyle = 'none';  
@@ -64,10 +68,8 @@ grid on
 
 lambda = [100 120 140 160 180 200]; 
 p = 20;
-n = 10;
-S = 100;
 % W = 0;    % b
-% W = 400;  % c
+%W = 400;  % c
  W = 600;  % d
 R = 10000;
 fname = 'movies.txt';
@@ -78,8 +80,10 @@ N = 10;
 % vectors with N simulation results
 block_hd = zeros(1,N); 
 block_4k = zeros(1,N);
+
 block_hd2 = zeros(1,N); 
 block_4k2 = zeros(1,N);
+
 block_hd3 = zeros(1,N); 
 block_4k3 = zeros(1,N);
 
@@ -93,7 +97,7 @@ mediaBlock_4k3 = zeros(1,size(lambda, 2));
 
 for i = 1:size(lambda, 2)
     for it= 1:N
-        [block_hd(it), block_4k(it)] = simulator2(lambda(i), p, n, S, W, R, fname);
+        [block_hd(it), block_4k(it)] = simulator2(lambda(i), p, 10, 100, W, R, fname);
         [block_hd2(it), block_4k2(it)] = simulator2(lambda(i), p, 4, 250, W, R, fname);
         [block_hd3(it), block_4k3(it)] = simulator2(lambda(i), p, 1, 1000, W, R, fname);
     end
@@ -114,12 +118,16 @@ end
 
 figure(3)
 bar(lambda,[mediaBlock_hd; mediaBlock_hd2; mediaBlock_hd3])
+title('Blocking probability of HD movies')
+xlabel('Request/Hour')
 legend('HD1', 'HD2', 'HD3', 'Location', 'northwest')
 ylim([0 100])
 grid on
 
 figure(4)
 bar(lambda,[mediaBlock_4k; mediaBlock_4k2; mediaBlock_4k3])
+title('Blocking probability of 4K movies')
+xlabel('Request/Hour')
 legend('4k1', '4k2', '4k3', 'Location', 'northwest')
 ylim([0 100])
 grid on

@@ -68,7 +68,7 @@ for i = 1:40
     I = [];
     for j = 1:40
         [p, d] = shortestpath(g, i, j);
-        if (d == 0) || (d ==1)
+        if (d == 0) || (d ==1) || (d == 2)
             I = [I j];
         end
     end
@@ -77,3 +77,54 @@ end
 
 display(II)
 
+%%
+g = graph(G(:,1), G(:,2));
+
+fid = fopen('ex3.lp', 'wt');
+
+fprintf(fid, 'Minimize\n');
+for i= 6:40
+   if i <= 15
+       fprintf(fid, ' + %f x%d', 12, i);    % tier2
+   else
+       fprintf(fid, ' + %f x%d', 8, i);     % tier3
+   end
+end
+
+fprintf(fid, '\nSubject To\n');
+for i = 6:40
+    for j = 6:40
+        [p, d] = shortestpath(g, i, j);
+        if (d == 0) || (d ==1) || (d == 2)
+            fprintf(fid, ' + y%d_%d', i, j);
+        end
+    end
+    fprintf(fid, ' = %f\n', 1);
+end
+
+for i = 6:40
+    for j = 6:40
+        [p, d] = shortestpath(g, i, j);
+        if (d == 0) || (d ==1) || (d == 2)
+            fprintf(fid, ' + y%d_%d', i, j);
+        end
+    end
+    fprintf(fid, ' = 0\n');
+end
+
+fprintf(fid,'Binary\n');
+for i = 6:40
+    fprintf(fid, ' x%d', i);
+end
+for i = 6:40
+    for j = 6:40
+        [p, d] = shortestpath(g, i, j);
+        if (d == 0) || (d ==1) || (d == 2)
+            fprintf(fid, ' y%d_%d', i, j);
+        end
+    end
+    fprintf(fid, '\n');
+end
+
+fprintf(fid,'End\n');
+fclose(fid);

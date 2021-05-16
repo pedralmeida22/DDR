@@ -1,6 +1,6 @@
 function [b_hd b_4k]= simulator2(lambda, p, n, S, W, R, fname)
     % lambda - movies request rate (in requests/hour)
-    % p - percentage of requestsfor4Kmovies (in %)
+    % p - percentage of requests for 4K movies (in %)
     % n - number of servers
     % S - interface capacity of each server(in Mbps)
     % W - resource reservation for 4Kmovies(in Mbps)
@@ -9,7 +9,7 @@ function [b_hd b_4k]= simulator2(lambda, p, n, S, W, R, fname)
     
     C = n * S;
     
-    invlambda=60/lambda;     %average time between requests (in minutes)
+    invlambda= 60/lambda;     %average time between requests (in minutes)
     invmiu= load(fname);     %duration (in minutes) of each movie
     Nmovies= length(invmiu); % number of movies
     
@@ -23,7 +23,7 @@ function [b_hd b_4k]= simulator2(lambda, p, n, S, W, R, fname)
     STATE_HD= 0;
     
     %Statistical counters initialization:
-    NARRIVALS= 0;   % total number of movie requestsup to current time instant
+    NARRIVALS= 0;   % total number of movie requests up to current time instant
     REQUESTS_HD= 0; % number of HD movie requests up to current time instant
     REQUESTS_4K= 0; % number of 4K movie requests up to current time instant
     BLOCKED_HD= 0;  % number of blocked HD movie requests up to current time instant
