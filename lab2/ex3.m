@@ -92,39 +92,86 @@ for i= 6:40
 end
 
 fprintf(fid, '\nSubject To\n');
-for i = 6:40
-    for j = 6:40
-        [p, d] = shortestpath(g, i, j);
-        if (d == 0) || (d ==1) || (d == 2)
-            fprintf(fid, ' + y%d_%d', i, j);
+for j = 6:40
+    for i = 6:40
+        [p, d] = shortestpath(g, j, i);
+        if (d <= 2)
+            fprintf(fid, ' + x%d', i);
         end
     end
-    fprintf(fid, ' = %f\n', 1);
+    fprintf(fid, ' >= %f\n', 1);
 end
 
-for i = 6:40
-    for j = 6:40
-        [p, d] = shortestpath(g, i, j);
-        if (d == 0) || (d ==1) || (d == 2)
-            fprintf(fid, ' + y%d_%d', i, j);
-        end
-    end
-    fprintf(fid, ' = 0\n');
-end
 
 fprintf(fid,'Binary\n');
 for i = 6:40
     fprintf(fid, ' x%d', i);
 end
-for i = 6:40
-    for j = 6:40
-        [p, d] = shortestpath(g, i, j);
-        if (d == 0) || (d ==1) || (d == 2)
-            fprintf(fid, ' y%d_%d', i, j);
-        end
-    end
-    fprintf(fid, '\n');
+
+fprintf(fid,'\nEnd\n');
+fclose(fid);
+
+%% b)
+
+r_tier2 = 10 * 5000;    % numero de AS tier2 * subscribers
+r_tier3 = 25 * 2500;    % numero de AS tier3 * subscribers
+
+lambda = ((r_tier2 + r_tier3) / 24);    % lambda - movies request rate (in requests/hour)
+p = 30;                                 % p - percentage of requests for 4K movies (in %)
+n = 76;                                 % n - number of servers
+S = 1000;                               % S - interface capacity of each server(in Mbps)
+W = 52150;                              % W - resource reservation for 4Kmovies(in Mbps)
+R = 50000;                              % R - number of movie requests to stop simulation
+fname = 'movies.txt';                   % fname - file name with the duration (in minutes) of the items
+
+N = 5;  % number of simulations
+
+block_hd = zeros(1,N); 
+block_4k = zeros(1,N);
+
+for it= 1:N
+    [block_hd(it), block_4k(it)] = simulator2(lambda, p, n, S, W, R, fname);
 end
 
-fprintf(fid,'End\n');
-fclose(fid);
+% 90confidence interval %
+alfa= 0.1; 
+
+mediaBlock_hd = mean(block_hd);
+termBlock_hd = norminv(1-alfa/2)*sqrt(var(block_hd)/N);
+
+mediaBlock_4k = mean(block_4k);
+termBlock_4k = norminv(1-alfa/2)*sqrt(var(block_4k)/N);
+    
+fprintf('\nNumber of servers: %.0f\n', n);
+fprintf('Reservation for 4K: %.0f\n', W);
+fprintf('block_hd: %.4f +- %.4f\n', mediaBlock_hd, termBlock_hd);
+fprintf('block_4k: %.4f +- %.4f\n', mediaBlock_4k, termBlock_4k);
+
+%%
+
+r_tier2 = 10 * 5000;    % numero de AS tier2 * subscribers
+r_tier3 = 25 * 2500;    % numero de AS tier3 * subscribers
+
+lambda = ((r_tier2 + r_tier3) / 24);    % lambda - movies request rate (in requests/hour)
+p = 30;                                 % p - percentage of requests for 4K movies (in %)
+S = 1000;                               % S - interface capacity of each server(in Mbps)
+W = 52150;                              % W - resource reservation for 4Kmovies(in Mbps)
+R = 50000;                              % R - number of movie requests to stop simulation
+fname = 'movies.txt';                   % fname - file name with the duration (in minutes) of the items
+
+block_hd = zeros(1,5); 
+block_4k = zeros(1,5);
+
+n = [74 75 76 77 78];
+for i=1:5
+    [block_hd(i), block_4k(i)] = simulator2(lambda, p, n(i), S, W, R, fname);
+end
+
+figure(1)
+bar(n, [block_hd; block_4k])
+title('Blocking probability for n servers - W = 52150')
+xlabel('Number of servers')
+legend('HD', '4K')
+grid on
+
+

@@ -77,6 +77,6 @@ function [b_hd b_4k]= simulator2(lambda, p, n, S, W, R, fname)
         EventList= sortrows(EventList,2);
      end
     
-    b_hd= 100*BLOCKED_HD/REQUESTS_HD;    % blocking probability of HD movie requests %
-    b_4k= 100*BLOCKED_4K/REQUESTS_4K;    % blocking probability of 4K movie requests %
+    b_hd= 100*(BLOCKED_HD/REQUESTS_HD);    % blocking probability of HD movie requests %
+    b_4k= 100*(BLOCKED_4K/REQUESTS_4K);    % blocking probability of 4K movie requests %
 end

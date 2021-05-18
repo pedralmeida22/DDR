@@ -131,3 +131,36 @@ xlabel('Request/Hour')
 legend('4k1', '4k2', '4k3', 'Location', 'northwest')
 ylim([0 100])
 grid on
+
+%% 2.e
+
+lambda = (100000 / 24);    % lambda - movies request rate (in requests/hour)
+p = 24;                                 % p - percentage of requests for 4K movies (in %)
+n = 76;                                 % n - number of servers
+S = 10000;                              % S - interface capacity of each server(in Mbps)
+W = 52150;                              % W - resource reservation for 4Kmovies(in Mbps)
+R = 100000;                             % R - number of movie requests to stop simulation
+fname = 'movies.txt';                   % fname - file name with the duration (in minutes) of the items
+
+N = 5;  % number of simulations
+
+block_hd = zeros(1,N); 
+block_4k = zeros(1,N);
+
+for it= 1:N
+    [block_hd(it), block_4k(it)] = simulator2(lambda, p, n, S, W, R, fname);
+end
+
+% 90confidence interval %
+alfa= 0.1; 
+
+mediaBlock_hd = mean(block_hd);
+termBlock_hd = norminv(1-alfa/2)*sqrt(var(block_hd)/N);
+
+mediaBlock_4k = mean(block_4k);
+termBlock_4k = norminv(1-alfa/2)*sqrt(var(block_4k)/N);
+    
+fprintf('\nNumber of servers: %.0f\n', n);
+fprintf('Reservation for 4K: %.0f\n', W);
+fprintf('block_hd: %.4f +- %.4f\n', mediaBlock_hd, termBlock_hd);
+fprintf('block_4k: %.4f +- %.4f\n', mediaBlock_4k, termBlock_4k);
