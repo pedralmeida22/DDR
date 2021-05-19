@@ -147,7 +147,7 @@ fprintf('Reservation for 4K: %.0f\n', W);
 fprintf('block_hd: %.4f +- %.4f\n', mediaBlock_hd, termBlock_hd);
 fprintf('block_4k: %.4f +- %.4f\n', mediaBlock_4k, termBlock_4k);
 
-%%
+%% grafico b)
 
 r_tier2 = 10 * 5000;    % numero de AS tier2 * subscribers
 r_tier3 = 25 * 2500;    % numero de AS tier3 * subscribers
@@ -174,4 +174,62 @@ xlabel('Number of servers')
 legend('HD', '4K')
 grid on
 
+%% c)
 
+% clientes por AS
+n9 = 7*2500 + 4*5000;
+n13 = 6*2500 + 5*5000;
+n16 = 6*2500 + 3*5000;
+n21 = 3*2500 + 3*5000;
+n30 = 6*2500 + 3*5000;
+
+% total de clientes 
+totalClients=10*5000+25*2500;
+
+% percentagem de clientes por AS
+perc9 = n9/totalClients;
+perc13 = n13/totalClients;
+perc16 = n16/totalClients;
+perc21 = n21/totalClients;
+perc30 = n30/totalClients;
+
+% n servidores necessários, calculado no b)
+totalServers = 76;
+
+% distribuicao dos servidores por AS com base no num de clientes desse AS
+servers9 = perc9*totalServers;
+servers13 = perc13*totalServers;
+servers16 = perc16*totalServers;
+servers21 = perc21*totalServers;
+servers30 = perc30*totalServers;
+
+totalServersNeeded = round(servers9) + round(servers13) + round(servers16) + round(servers21) + round(servers30);
+
+realServers9 = round(servers9)*totalServers / totalServersNeeded;
+realServers13 = round(servers13)*totalServers / totalServersNeeded;
+realServers16 = round(servers16)*totalServers / totalServersNeeded;
+realServers21 = round(servers21)*totalServers / totalServersNeeded;
+realServers30 = round(servers30)*totalServers / totalServersNeeded;
+
+fprintf('Servers in operation in AS 9: %d\n', round(realServers9));
+fprintf('Servers in operation in AS 13: %d\n', round(realServers13));
+fprintf('Servers in operation in AS 16: %d\n', round(realServers16));
+fprintf('Servers in operation in AS 21: %d\n', round(realServers21));
+fprintf('Servers in operation in AS 30: %d\n', round(realServers30));
+fprintf('Total servers: %d\n', totalServers);
+
+% graficos
+clientes = [perc9 perc13 perc16 perc21 perc30];
+servers = [round(realServers9) round(realServers13) round(realServers16) round(realServers21) round(realServers30)];
+
+figure(2)
+bar([9 13 16 21 30], clientes)
+title('Percentage of clients per AS')
+xlabel('AS number')
+grid on
+
+figure(3)
+bar([9 13 16 21 30], servers)
+title('Number of servers per AS')
+xlabel('AS number')
+grid on
