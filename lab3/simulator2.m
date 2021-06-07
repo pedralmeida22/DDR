@@ -4,7 +4,7 @@ function [PL , APD , MPD , TT] = Simulator2(lambda,C,f,P,b)
 %  C      - link bandwidth (Mbps)
 %  f      - queue size (Bytes)
 %  P      - number of packets (stopping criterium)
-% b       - Bit error rate
+%  b      - Bit error rate
 % OUTPUT PARAMETERS:
 %  PL   - packet loss (%)
 %  APD  - average packet delay (milliseconds)
@@ -58,13 +58,19 @@ while TRANSMITTEDPACKETS<P               % Stopping criterium
                     LOSTPACKETS= LOSTPACKETS + 1;
                 end
             end
-        case DEPARTURE                     % If first event is a DEPARTURE
-            TRANSMITTEDBYTES= TRANSMITTEDBYTES + PacketSize;
-            DELAYS= DELAYS + (Clock - ArrivalInstant);
-            if Clock - ArrivalInstant > MAXDELAY
-                MAXDELAY= Clock - ArrivalInstant;
+        case DEPARTURE                    % If first event is a DEPARTURE
+            error = rand() > ((1 - b)^(8*PacketSize));
+            if error
+                LOSTPACKETS= LOSTPACKETS + 1;
+            else
+                TRANSMITTEDBYTES= TRANSMITTEDBYTES + PacketSize;
+                DELAYS= DELAYS + (Clock - ArrivalInstant);
+                if Clock - ArrivalInstant > MAXDELAY
+                    MAXDELAY= Clock - ArrivalInstant;
+                end
+                TRANSMITTEDPACKETS= TRANSMITTEDPACKETS + 1;
             end
-            TRANSMITTEDPACKETS= TRANSMITTEDPACKETS + 1;
+            
             if QUEUEOCCUPATION > 0
                 EventList = [EventList; DEPARTURE, Clock + 8*QUEUE(1,1)/(C*10^6), QUEUE(1,1), QUEUE(1,2)];
                 QUEUEOCCUPATION= QUEUEOCCUPATION - QUEUE(1,1);
