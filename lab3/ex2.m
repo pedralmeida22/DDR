@@ -48,7 +48,7 @@ fprintf('Throughtput (Mbps): %.4f +- %.4f\n', mediaTT, termTT);
 
 lambda = 1800;
 C = 10 * 1e6;     %(Mbps)
-%b = 1e-6; % a)
+% b = 1e-6; % a)
 b = 1e-5; % b)
 
 % B - tamanho medio de pacotes
@@ -125,9 +125,9 @@ TT= T64 + T110 + T1518;
 
 for i=1:length(tam)
     Pi = (1 - b)^(8*tam(i));
-    TT=TT+(pres * Pi * lambda * (8*tam(i)));
+    TT= TT + (pres * Pi * lambda * (8*tam(i)));
 end
 
 fprintf('\nPacket Loss: %.4f\n', pli);
-fprintf('Avg packet delay (ms): %.4e\n', APD);
-fprintf('Throughtput (Mbps): %.4e\n', TT);
+fprintf('Avg packet delay (ms): %.4f\n', APD * 1e3);
+fprintf('Throughtput (Mbps): %.4f\n', TT / 1e6);

@@ -18,6 +18,8 @@ mediaPL = size(lambda, 2);
 termPL = size(lambda, 2);
 mediaAPD = size(lambda, 2);
 termAPD = size(lambda, 2);
+mediaMPD = size(lambda, 2);
+termMPD = size(lambda, 2);
 mediaTT = size(lambda, 2);
 termTT = size(lambda, 2);
 
@@ -81,14 +83,15 @@ grid on
 disp('Simulation started');
 
 lambda = [1500, 1600, 1700, 1800, 1900, 2000];
-C = 10;
+C = 10 * 1e6;
 P = 10000;
 f = 10000000;
 b = 0;
 
 % number of simulations
 %N = 20; % a
-N = 1; % b
+N = 40; % b
+N = 5;
 
 APD = zeros(1,N);
 TT = zeros(1,N);
@@ -98,7 +101,7 @@ mediaTT = size(lambda, 2);
 
 for i=1:size(lambda, 2)
     for it=1:N
-       [PL(it), APD(it), MPD(it), TT(it)] = simulator2(lambda(i), C, f, P, b);
+       [PL(it), APD(it), MPD(it), TT(it)] = simulator2(lambda(i), 10, f, P, b);
     end
 
     % 90confidence interval %
@@ -124,10 +127,10 @@ B = p64 + p110 + p1518;
 for i=1:length(tam)
     B = B + (tam(i) * pres);
 end
-miu = (C *1e6) / (B * 8);
+miu = (C) / (B * 8);
 
-APD_mm1 = size(lambda, 2);
-TT_mm1 = size(lambda, 2);
+APD_mm1 = zeros(1, size(lambda, 2));
+TT_mm1 = zeros(1, size(lambda, 2));
 
 for i=1:size(lambda, 2)
     APD_mm1(i) = 1000 / (miu - lambda(i));
@@ -144,12 +147,12 @@ P110 = (1 - b)^(8*110);
 P1518 = (1 - b)^(8*1518);
 
 % avg packet delay
-es64 = p64 * ((8 * 64) / C);
-es110 = p110 * ((8 * 110) / C);
-es1518 = p1518 * ((8 * 1518) / C);
-ess64 = p64 * ((8 * 64) / C)^2;
-ess110 = p110 * ((8 * 110) / C)^2;
-ess1518 = p1518 * ((8 * 1518) / C)^2;
+es64 = 0.16 * ((8 * 64) / C);
+es110 = 0.25 * ((8 * 110) / C);
+es1518 = 0.20 * ((8 * 1518) / C);
+ess64 = 0.16 * ((8 * 64) / C)^2;
+ess110 = 0.25 * ((8 * 110) / C)^2;
+ess1518 = 0.20 * ((8 * 1518) / C)^2;
 
 es = es64 + es110 + es1518;
 ess = ess64 + ess110 + ess1518;
@@ -160,8 +163,8 @@ for i=1:length(tam)
 end
 
 
-APD_mg1 = size(lambda, 2);
-TT_mg1 = size(lambda, 2);
+APD_mg1 = zeros(1, size(lambda, 2));
+TT_mg1 = zeros(1, size(lambda, 2));
 
 for i=1:size(lambda, 2)
     wq = (lambda(i) * ess) / (2 * (1 - lambda(i) * es));
@@ -170,12 +173,12 @@ for i=1:size(lambda, 2)
     wi110 = wq + ((8*110)/C);
     wi1518 = wq + ((8*1518)/C);
 
-    apdUp64 = p64 * P64 * wi64;
-    apdUp110 = p110 * P110 * wi110;
-    apdUp1518 = p1518 * P1518 * wi1518;
-    apdDown64 = p64 * P64;
-    apdDown110 = p110 * P110;
-    apdDown1518 = p1518 * P1518;
+    apdUp64 = 0.16 * P64 * wi64;
+    apdUp110 = 0.25 * P110 * wi110;
+    apdUp1518 = 0.20 * P1518 * wi1518;
+    apdDown64 = 0.16 * P64;
+    apdDown110 = 0.25 * P110;
+    apdDown1518 = 0.20 * P1518;
 
     apdUp = apdUp64 + apdUp110 + apdUp1518;
     apdDown = apdDown64 + apdDown110 + apdDown1518;
@@ -187,20 +190,20 @@ for i=1:size(lambda, 2)
         apdDown = apdDown + pres * Pi;
     end
 
-    APD_mg1(i) = apdUp / apdDown;
+    APD_mg1(i) = 1e3 * (apdUp / apdDown);
     
     % total throughput
-    T64= p64 * P64 * lambda(i)*8*64;
-    T110= p110 * P110 * lambda(i)*8*110;
-    T1518= p1518 * P1518 * lambda(i)*8*1518;
-    TT_mg1(i)= T64 + T110 + T1518;
+    T64= 0.16 * P64 * lambda(i)*8*64;
+    T110= 0.25 * P110 * lambda(i)*8*110;
+    T1518= 0.20 * P1518 * lambda(i)*8*1518;
+    TT_mg1(i)= (T64 + T110 + T1518);
 
     for it=1:length(tam)
         Pi = (1 - b)^(8*tam(it));
-        TT_mg1(i)= TT_mg1(i) +(pres * Pi * lambda(i) * (8*tam(it)));
+        TT_mg1(i)= (TT_mg1(i) + (pres * Pi * lambda(i) * (8*tam(it))));
     end
+    TT_mg1(i)= TT_mg1(i) / 1e6;
 end
-
 
 % plots
 figure(4)
