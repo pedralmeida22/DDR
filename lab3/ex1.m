@@ -115,4 +115,37 @@ fprintf('Throughtput (Mbps): %.4e\n', TT);
 % e M/M/1/m queueing model
 
 lambda = 1800;
-C = 10 * 1e6;     %(Mbps)
+C = 10;
+f=1e4;
+
+aux2= [65:109 111:1517];
+pres = (1-(0.2+0.16+0.25))/length(aux2);
+
+B = 0.16*64 + 0.25*110 + 0.20*1518;
+for i = 1:length(aux2)
+    B = B + (aux2(i)*pres);
+end
+
+m = round(f/B)+1;
+miu=(C*1e6)/(B*8);
+numerador = 0;
+denominador = 0;
+for j=0:m
+    denominador = denominador + (lambda/miu)^j;
+    numerador = numerador + j*((lambda/miu)^j);
+end
+
+PL = ((lambda/miu)^m)/denominador;
+L = numerador/denominador;
+APD = L/(lambda*(1-PL));
+
+TT = 0.16*lambda*(8*64) + 0.25*lambda*(8*110) + 0.20*lambda*(8*1518); 
+for i = 1:length(aux2)
+    TT = TT + pres*lambda*(8*aux2(i));
+end
+
+TT = TT*(1-PL);
+
+fprintf('\nPacket Loss(%%): %.4f\n', PL*100);
+fprintf('Avg packet delay (ms): %.4f\n', APD*1000);
+fprintf('Throughput (Mbps): %.4f\n', TT/(1e6));

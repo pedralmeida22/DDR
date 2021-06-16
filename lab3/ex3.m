@@ -14,14 +14,14 @@ APD = zeros(1,N);
 MPD = zeros(1,N);
 TT = zeros(1,N);
 
-mediaPL = size(lambda, 2);
-termPL = size(lambda, 2);
-mediaAPD = size(lambda, 2);
-termAPD = size(lambda, 2);
-mediaMPD = size(lambda, 2);
-termMPD = size(lambda, 2);
-mediaTT = size(lambda, 2);
-termTT = size(lambda, 2);
+mediaPL = zeros(1, size(lambda, 2));
+termPL = zeros(1, size(lambda, 2));
+mediaAPD = zeros(1, size(lambda, 2));
+termAPD = zeros(1, size(lambda, 2));
+mediaMPD = zeros(1, size(lambda, 2));
+termMPD = zeros(1, size(lambda, 2));
+mediaTT = zeros(1, size(lambda, 2));
+termTT = zeros(1, size(lambda, 2));
 
 for i=1:size(lambda, 2)
     for it=1:N
@@ -96,16 +96,13 @@ N = 5;
 APD = zeros(1,N);
 TT = zeros(1,N);
 
-mediaAPD = size(lambda, 2);
-mediaTT = size(lambda, 2);
+mediaAPD = zeros(1, size(lambda, 2));
+mediaTT = zeros(1, size(lambda, 2));
 
 for i=1:size(lambda, 2)
     for it=1:N
        [PL(it), APD(it), MPD(it), TT(it)] = simulator2(lambda(i), 10, f, P, b);
     end
-
-    % 90confidence interval %
-    alfa= 0.1; 
 
     mediaAPD(i) = mean(APD);
     mediaTT(i) = mean(TT);
@@ -241,12 +238,12 @@ APD = zeros(1,N);
 MPD = zeros(1,N);
 TT = zeros(1,N);
 
-mediaPL = size(f, 2);
-termPL = size(f, 2);
-mediaAPD = size(f, 2);
-termAPD = size(f, 2);
-mediaTT = size(f, 2);
-termTT = size(f, 2);
+mediaPL = zeros(1, size(f, 2));
+termPL = zeros(1, size(f, 2));
+mediaAPD = zeros(1, size(f, 2));
+termAPD = zeros(1, size(f, 2));
+mediaTT = zeros(1, size(f, 2));
+termTT = zeros(1, size(f, 2));
 
 for i=1:size(f, 2)
     for it=1:N
@@ -305,4 +302,128 @@ grid on
 
 %%
 % e)
+lambda = 1800;
+C = 10;
+P = 10000;
+f = [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000];
+b = 0; 
+
+disp('Simulation started');
+% number of simulations
+N = 40;
+N=5;
+
+PL = zeros(1,N); 
+APD = zeros(1,N);
+MPD = zeros(1,N);
+TT = zeros(1,N);
+
+mediaPL = zeros(1, size(f, 2));
+mediaAPD = zeros(1, size(f, 2));
+mediaTT = zeros(1, size(f, 2));
+
+for i=1:size(f, 2)
+    for it=1:N
+       [PL(it), APD(it), MPD(it), TT(it)] = simulator2(lambda, C, f(i), P, b);
+    end
+
+    mediaPL(i) = mean(PL);
+    mediaAPD(i) = mean(APD);
+    mediaTT(i) = mean(TT);
+end
+
+
+% M/M/1/m queueing model
+disp('MM1m started')
+PL_mm1m = zeros(1, size(f,2));
+APD_mm1m = zeros(1, size(f,2));
+TT_mm1m = zeros(1, size(f,2));
+
+aux2= [65:109 111:1517];
+pres = (1-(0.2+0.16+0.25))/length(aux2);
+
+B = 0.16*64 + 0.25*110 + 0.20*1518;
+for i = 1:length(aux2)
+    B = B + (aux2(i)*pres);
+end
+
+for i=1:size(f, 2)    
+    m = round(f(i)/B)+1;
+    miu=(C*1e6)/(B*8);
+    numerador = 0;
+    denominador = 0;
+    
+    for j=0:m
+        denominador = denominador + (lambda/miu)^j;
+        numerador = numerador + j*((lambda/miu)^j);
+    end
+    
+    PL_mm1m(i) = (((lambda/miu)^m)/denominador);
+    L = numerador/denominador;
+    APD_mm1m(i) = (L/(lambda*(1-PL_mm1m(i))));
+    
+    TT_mm1m(i) = 0.16*lambda*(8*64) + 0.25*lambda*(8*110) + 0.20*lambda*(8*1518); 
+    for j = 1:length(aux2)
+        TT_mm1m(i) = TT_mm1m(i) + pres*lambda*(8*aux2(j));
+    end
+    TT_mm1m(i) = TT_mm1m(i)*(1-PL_mm1m(i));
+    
+    PL_mm1m(i) = PL_mm1m(i) * 100;
+    APD_mm1m(i) = APD_mm1m(i) * 1000;
+    TT_mm1m(i) = TT_mm1m(i) / (1e6);
+end
+
+
+% plots
+
+figure(6)
+bar(f, [mediaPL; PL_mm1m])
+title('Packet Loss')
+legend('Sim', 'MM1M', 'Location', 'northeast')
+xlabel('Queue size (Bytes)')
+ylabel('(%%)')
+grid on
+
+figure(7)
+bar(f, [mediaAPD; APD_mm1m])
+title('Average Packet Delay')
+xlabel('Queue size (Bytes)')
+ylabel('(ms)')
+legend('Sim', 'MM1M', 'Location', 'northwest')
+grid on
+
+figure(8)
+bar(f, [mediaTT; TT_mm1m])
+title('Total Throughput')
+xlabel('Queue size (Bytes)')
+ylabel('(Mbps)')
+legend('Sim', 'MM1M', 'Location', 'northwest')
+grid on
+
+%%%%% juntos
+% figure(5)
+% subplot(3,1,1)
+% bar(f, [mediaPL; PL_mm1m])
+% title('Packet Loss')
+% xlabel('Queue size (Bytes)')
+% ylabel('(%%)')
+% legend('Sim', 'MM1M', 'Location', 'northeast')
+% grid on
+% 
+% subplot(3,1,2)
+% bar(f, [mediaAPD; APD_mm1m])
+% title('Average Packet Delay')
+% xlabel('Queue size (Bytes)')
+% ylabel('(ms)')
+% legend('Sim', 'MM1M', 'Location', 'northwest')
+% grid on
+% 
+% subplot(3,1,3)
+% bar(f, [mediaTT; TT_mm1m])
+% title('Total Throughput')
+% xlabel('Queue size (Bytes)')
+% ylabel('(Mbps)')
+% legend('Sim', 'MM1M', 'Location', 'northwest')
+% grid on
+
 
