@@ -122,8 +122,8 @@ lambda = 1800;  % lambda - packet rate (packets/sec)
 C = 10;         % link bandwidth (Mbps)
 P = 100000;     % number of packets (stopping criterium)
 f = [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000]; 
-b = 0; % d)
-%b = 1e-5; % f)
+%b = 0; % d)
+b = 1e-5; % f)
 
 mediaPL = zeros(1, size(f, 2));
 mediaAPD = zeros(1, size(f, 2));
